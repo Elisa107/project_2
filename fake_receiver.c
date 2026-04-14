@@ -6,12 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int current_line_count = 0;
-static int next_start_stop = 50;
-static int start_or_stop = 0;
-static int line_count = 0;
-static int opened = 0;
-static FILE* can = NULL;
+static int current_line_count = 0;  //righe lette
+static int next_start_stop = 50;  //ogni quante righe mandare messaggio speciale
+static int start_or_stop = 0;  // 0=start, 1=stop
+static int line_count = 0;  //righe totali del file
+static int opened = 0;  //se file è stato aperto o no
+static FILE* can = NULL;  //puntatore al file
 
 int open_can(const char* filepath){
     if(opened == 1)
@@ -30,18 +30,19 @@ int open_can(const char* filepath){
             line_count ++;
         }
     }
-    fseek(can, 0, SEEK_SET);
+    fseek(can, 0, SEEK_SET); //torna all'inizio del file
 
     return 0;
 }
 
+//legge
 int can_receive(char message[MAX_CAN_MESSAGE_SIZE]){
     if(opened == 0)
         return -1;
     
     char c;
     int bytes_received = 0;
-    memset(message, 0, strlen(message));
+    memset(message, 0, strlen(message)); //azzera array
 
     if((current_line_count+1) % next_start_stop == 0){
         printf("\n\n%d, %d\n\n", next_start_stop, start_or_stop);
@@ -60,10 +61,10 @@ int can_receive(char message[MAX_CAN_MESSAGE_SIZE]){
         }
         bytes_received = strlen(message);
         current_line_count ++;
-        return bytes_received;
+        return bytes_received;  // non legge da file, manda messaggio speciale
     }
 
-    while((c = fgetc(can)) != EOF){
+    while((c = fgetc(can)) != EOF){ // lettura da file riga per riga, carattere per carattere
         if(c == '\n')
             break;
         message[bytes_received] = c;
@@ -74,8 +75,8 @@ int can_receive(char message[MAX_CAN_MESSAGE_SIZE]){
         return -1;
 
     current_line_count ++;
-    if(current_line_count == line_count)
-        fseek(can, 0, SEEK_SET);
+    if(current_line_count == line_count) 
+        fseek(can, 0, SEEK_SET); //per loop sul file, torna all'inizio
     
     usleep((rand()%50 + 1)*1000);
 
