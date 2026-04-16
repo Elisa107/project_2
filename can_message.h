@@ -11,9 +11,13 @@ typedef struct {
     int      payload_bytes;
 } CanMessage;
 
-int check_can_message(const char* raw, CanMessage* message);
+typedef enum {
+    IDLE,
+    RUN
+} State;
 
-int check_start_message(const CanMessage* message);
-int check_stop_message(const CanMessage* message);
+int check_can_message(const char* raw, CanMessage* message);
+int check_start(const CanMessage* message);
+int check_stop(const CanMessage* message);
 
 #endif
