@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <ctime>
+#include <cerrno>
+#include <cstring>
+
 using namespace std;
 
 #define CAN_FILE "../candump.log"
@@ -12,13 +17,15 @@ extern "C"{
 int main(void){
 
     if(open_can(CAN_FILE)!=0){
-        printf("Errore apertura file\n");
+        cout << "Errore apertura file\n";
         return -1;
     }
 
+    fstream outputFile;
     State state = IDLE;
     char raw[MAX_CAN_MESSAGE_SIZE];
     CanMessage message;
+    int session_number = 0;
 
     while(true){
 
@@ -32,20 +39,34 @@ int main(void){
         if(state == IDLE){
             if(check_start(&message)){
                 //new session started
+                if(outputFile.is_open()){
+                    outputFile.close();
+                }
+
+                session_number++;
+                outputFile.open("../sessions/session_" + to_string(session_number) + ".log", ios::out);
+
+                if(outputFile.fail()){
+                    cout << "Errore apertura file sessione: " << strerror(errno) << "\n";
+                    return -1;
+                }
+
                 state = RUN;
             }
         }else{
             if(check_stop(&message)){
+                // need to close the file, session finished
                 state = IDLE;
-                // need to close the file
+                if(outputFile.is_open()){
+                    outputFile.close();
+                }
             }else{
-
-                //save raw message in a file (each session has a different file)
-                // the file needs a line for each message received file+timestamp
+                outputFile << "(" << time(NULL) << ") " << raw << "\n";
             }
         }
     }
 
+    outputFile.close();
     close_can();
     return 0;
 }
