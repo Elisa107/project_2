@@ -19,6 +19,7 @@ add_library(
     # Sources
     ${CMAKE_CURRENT_SOURCE_DIR}/fake_receiver.c
     ${CMAKE_CURRENT_SOURCE_DIR}/can_message.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/statistics.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

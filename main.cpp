@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cerrno>
 #include <cstring>
+#include <statistics.h>
 
 using namespace std;
 
@@ -21,11 +22,14 @@ int main(void){
         return -1;
     }
 
+
+    // vars
     fstream outputFile;
     State state = IDLE;
     char raw[MAX_CAN_MESSAGE_SIZE];
     CanMessage message;
     int session_number = 0;
+    map<uint16_t, MessageStats> statistics_map;
 
     while(true){
 
@@ -36,6 +40,7 @@ int main(void){
             continue;
         }
 
+        // FSM
         if(state == IDLE){
             if(check_start(&message)){
                 //new session started
@@ -50,7 +55,6 @@ int main(void){
                     cout << "Errore apertura file sessione: " << strerror(errno) << "\n";
                     return -1;
                 }
-
                 state = RUN;
             }
         }else{
@@ -60,8 +64,14 @@ int main(void){
                 if(outputFile.is_open()){
                     outputFile.close();
                 }
+                // CSV 
+                save_csv(statistics_map, session_number);
+                reset_stat(statistics_map);
             }else{
+                // update a new data
                 outputFile << "(" << time(NULL) << ") " << raw << "\n";
+                //CSV
+                update_stat(statistics_map, message.id);
             }
         }
     }
