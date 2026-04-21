@@ -11,6 +11,7 @@
 using namespace std;
 
 #define CAN_FILE "../candump.log"
+#define SESSION_FILES "../sessions/session_"
 
 extern "C"{
     #include "fake_receiver.h"
@@ -44,6 +45,7 @@ int main(void){
 
         strcpy(raw, shared_message);
         message_ready = false;
+        pthread_cond_signal(&cond_var);
         pthread_mutex_unlock(&mut);
         // cout << "Main: messaggio ricevuto " << raw << "\n";
         
@@ -60,7 +62,7 @@ int main(void){
                 }
 
                 session_number++;
-                outputFile.open("../sessions/session_" + to_string(session_number) + ".log", ios::out);
+                outputFile.open(SESSION_FILES + to_string(session_number) + ".log", ios::out);
 
                 if(outputFile.fail()){
                     cout << "Errore apertura file sessione\n";

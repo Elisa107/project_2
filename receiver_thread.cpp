@@ -27,6 +27,11 @@ void* receiver_function(void* arg){
         message_ready = true;
         // cout << "Thread: messaggio inviato " << local_message << "\n";
         pthread_cond_signal(&cond_var);
+
+        while(message_ready){
+            pthread_cond_wait(&cond_var, &mut);
+        }
+        
         pthread_mutex_unlock(&mut);
     }
     return NULL;
