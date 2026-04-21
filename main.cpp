@@ -4,7 +4,10 @@
 #include <ctime>
 #include <cerrno>
 #include <cstring>
-#include <statistics.h>
+#include <pthread.h>
+
+#include "statistics.h"
+#include "receiver_thread.h"
 
 using namespace std;
 
@@ -24,6 +27,8 @@ int main(void){
 
 
     // vars
+    pthread_t thread;
+    pthread_create(&thread, NULL, receiver_function, NULL);
     fstream outputFile;
     State state = IDLE;
     char raw[MAX_CAN_MESSAGE_SIZE];
@@ -31,11 +36,19 @@ int main(void){
     int session_number = 0;
     map<uint16_t, MessageStats> statistics_map;
 
-    while(true){
+    while(1){
 
-        if(can_receive(raw) < 0){
-            continue;
+        // thread
+        pthread_mutex_lock(&mut);
+        while(!message_ready){
+            pthread_cond_wait(&cond_var, &mut);
         }
+
+        strcpy(raw, shared_message);
+        message_ready = false;
+        pthread_mutex_unlock(&mut);
+        // cout << "Main: messaggio ricevuto " << raw << "\n";
+        
         if(check_can_message(raw, &message) !=0){
             continue;
         }
@@ -76,6 +89,7 @@ int main(void){
         }
     }
 
+    pthread_join(thread, NULL);
     outputFile.close();
     close_can();
     return 0;
