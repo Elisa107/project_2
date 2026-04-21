@@ -6,9 +6,8 @@ using namespace std;
 
 void update_stat(map<uint16_t, MessageStats>& statistics_map, uint16_t id){
     struct timespec now;
-    clock_gettime(CLOCK_REALTIME, &now);
+    clock_gettime(CLOCK_MONOTONIC, &now);
 
-    // SISTEMARE I TEMPI
     if(statistics_map.find(id) == statistics_map.end()){
         statistics_map[id].num_messages = 1;
         statistics_map[id].mean_time = 0;
@@ -29,9 +28,9 @@ void save_csv(map<uint16_t, MessageStats>& statistics_map, int session_number){
         return;
     }
 
-    csv << "ID, number_of_messages, mean_time\n";
+    csv << "ID; number_of_messages; mean_time\n";
     for(auto& i : statistics_map){
-        csv << i.first << "," << i.second.num_messages << "," << i.second.mean_time << "\n";
+        csv << i.first << ";" << i.second.num_messages << ";" << i.second.mean_time << "\n";
     }
     csv.close();
 }

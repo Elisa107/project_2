@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
-#include <cerrno>
 #include <cstring>
 #include <pthread.h>
 
@@ -24,7 +23,6 @@ int main(void){
         cout << "Errore apertura file\n";
         return -1;
     }
-
 
     // vars
     pthread_t thread;
@@ -65,7 +63,7 @@ int main(void){
                 outputFile.open("../sessions/session_" + to_string(session_number) + ".log", ios::out);
 
                 if(outputFile.fail()){
-                    cout << "Errore apertura file sessione: " << strerror(errno) << "\n";
+                    cout << "Errore apertura file sessione\n";
                     return -1;
                 }
                 state = RUN;
