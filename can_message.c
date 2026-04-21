@@ -20,7 +20,7 @@ int check_can_message(const char* raw, CanMessage* message){
     message->id = (uint16_t)strtol(id_str, NULL, 16); // converto stringa in intero esadecimale 
 
     // controllo payload
-    char* payload_str = separator +1;
+    const char* payload_str = separator +1;
     int payload_char = strlen(payload_str);
     if(payload_char == 0 || payload_char%2 != 0 || payload_char > 16){
         return -1;
